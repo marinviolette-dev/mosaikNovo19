@@ -21,34 +21,152 @@
 </html>
 
 
-export default {
-  async fetch(request) {
+<!DOCTYPE html>
 
-    const url = new URL(request.url);
-    const channel = url.pathname.replace("/", "");
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mosaïque TV</title>
 
-    const sources = {
-      bfmtv: "TON_LIEN_BFMTV_M3U8",
-      lci: "TON_LIEN_LCI_M3U8",
-      cnews: "TON_LIEN_CNEWS_M3U8",
-      franceinfo: "TON_LIEN_FRANCEINFO_M3U8"
-    };
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-    const streamUrl = sources[channel];
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:black;
+  font-family:Arial;
+}
 
-    if (!streamUrl) {
-      return new Response("Unknown channel", { status: 404 });
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  height:100vh;
+  gap:2px;
+}
+
+.tile{
+  position:relative;
+  background:black;
+  overflow:hidden;
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.label{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:rgba(0,0,0,0.6);
+  color:white;
+  padding:5px 8px;
+  font-size:12px;
+  z-index:2;
+  border-radius:5px;
+}
+
+.back{
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:999;
+  padding:8px 12px;
+}
+</style>
+
+</head>
+
+<body>
+
+<button class="back" onclick="location.href='index.html'">← Retour</button>
+
+<div class="grid" id="grid"></div>
+
+<script>
+
+const WORKER_URL = "https://TON-WORKER.workers.dev";
+
+async function getStream(channel){
+  const res = await fetch(`${WORKER_URL}/${channel}`);
+  const data = await res.json();
+  return data.url;
+}
+
+const groups = {
+  g1: ["bfmtv","lci","cnews","franceinfo"],
+  g2: ["bfmtv","lci","franceinfo","novo19"],
+  g3: ["bfmtv","tf1","france2","cnews"]
+};
+
+const params = new URLSearchParams(location.search);
+const group = params.get("group");
+
+const selected = groups[group];
+
+const grid = document.getElementById("grid");
+
+async function load(){
+
+  for(const channel of selected){
+
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.innerText = channel;
+    tile.appendChild(label);
+
+    if(channel === "tf1" || channel === "france2"){
+      const error = document.createElement("div");
+      error.style.color = "white";
+      error.style.display = "flex";
+      error.style.justifyContent = "center";
+      error.style.alignItems = "center";
+      error.style.height = "100%";
+      error.innerText = "Flux non configuré";
+      tile.appendChild(error);
+      grid.appendChild(tile);
+      continue;
     }
 
-    // IMPORTANT : on ne "cache" pas vraiment ici,
-    // on sert juste un point central stable
-    return new Response(JSON.stringify({
-      url: streamUrl
-    }), {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+    const video = document.createElement("video");
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    tile.appendChild(video);
+    grid.appendChild(tile);
+
+    try{
+
+      const url = await getStream(channel);
+
+      if(Hls.isSupported()){
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else {
+        video.src = url;
       }
-    });
+
+    } catch(e){
+      tile.innerHTML += "<div style='color:white;padding:10px'>Erreur flux</div>";
+    }
+
   }
-}; 
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>

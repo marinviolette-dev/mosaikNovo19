@@ -19,3 +19,36 @@
 
 </body>
 </html>
+
+
+export default {
+  async fetch(request) {
+
+    const url = new URL(request.url);
+    const channel = url.pathname.replace("/", "");
+
+    const sources = {
+      bfmtv: "TON_LIEN_BFMTV_M3U8",
+      lci: "TON_LIEN_LCI_M3U8",
+      cnews: "TON_LIEN_CNEWS_M3U8",
+      franceinfo: "TON_LIEN_FRANCEINFO_M3U8"
+    };
+
+    const streamUrl = sources[channel];
+
+    if (!streamUrl) {
+      return new Response("Unknown channel", { status: 404 });
+    }
+
+    // IMPORTANT : on ne "cache" pas vraiment ici,
+    // on sert juste un point central stable
+    return new Response(JSON.stringify({
+      url: streamUrl
+    }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  }
+}; 

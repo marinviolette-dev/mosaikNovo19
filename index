@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mosaïque TV</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="home">
+
+<h1>Mosaïque TV</h1>
+
+<div class="groups">
+
+<button onclick="openGroup('g1')">
+BFMTV / LCI / CNEWS / France Info
+</button>
+
+<button onclick="openGroup('g2')">
+BFMTV / LCI / France Info / NOVO19
+</button>
+
+<button onclick="openGroup('g3')">
+BFMTV / TF1 / France 2 / CNEWS
+</button>
+
+</div>
+
+<script>
+function openGroup(group){
+    window.location.href = "mosaic.html?group=" + group;
+}
+</script>
+
+</body>
+</html>

@@ -12,7 +12,7 @@ url: "https://www.tf1info.fr/direct/"
 
 cnews: {
 name: "CNEWS",
-url: "https://www.cnews.fr/le-direct"
+url: "https://live.eu-north-1a.cf.dmcdn.net/sec2(TQIS_gYpez2e12xW_iZamgZA4GE8rxQGjIBl569w7GJhyTixlIhwGLgpHn3kumf9K-w44Ry1WMJk2I5-s1KTVidhISikWWqye1MHY58_kV3FT5CAu_HstiOhTr_AGdM_)/dm/3/x3b68jn/d/stream-720@60-1780039523.ts"
 },
 
 franceinfo: {

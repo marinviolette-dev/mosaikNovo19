@@ -22,7 +22,7 @@ url: "https://www.youtube.com/watch?v=NG7ZX42nZKc"
 
 novo19: {
 name: "NOVO19",
-url: "<iframe width="1071" height="602" src="https://www.youtube.com/embed/NG7ZX42nZKc" title="🔴​ franceinfo - DIRECT TV - actualité France et monde, interviews, documentaires et analyses" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>"
+url: "https://www.youtube.com/embed/NG7ZX42nZKc"
 },
 
 tf1: {

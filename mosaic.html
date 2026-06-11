@@ -1,149 +1,159 @@
-
-
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mosaïque TV de martin <3 </title>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mosaïque TV</title>
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  background:black;
-  font-family:Arial;
+
+body {
+    margin: 0;
+    background: black;
+    font-family: Arial;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:1fr 1fr;
-  height:100vh;
-  gap:2px;
+/* GRID 2x2 */
+#grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    width: 100vw;
+    height: 100vh;
 }
 
-.tile{
-  position:relative;
-  background:black;
-  overflow:hidden;
+/* CHAQUE TILE */
+.tile {
+    position: relative;
+    border: 1px solid #222;
+    overflow: hidden;
+    background: black;
 }
 
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+/* LABEL */
+.label {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 2;
+    color: white;
+    font-size: 14px;
+    background: rgba(0,0,0,0.6);
+    padding: 3px 6px;
+    border-radius: 4px;
 }
 
-.label{
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:rgba(0,0,0,0.6);
-  color:white;
-  padding:5px 8px;
-  font-size:12px;
-  z-index:2;
-  border-radius:5px;
+/* IFRAME */
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
-.back{
-  position:fixed;
-  top:10px;
-  left:10px;
-  z-index:999;
-  padding:8px 12px;
-}
 </style>
-
 </head>
 
 <body>
 
-<button class="back" onclick="location.href='index.html'">← Retour</button>
-
-<div class="grid" id="grid"></div>
+<div id="grid"></div>
 
 <script>
 
-const WORKER_URL = "https://ded6dd1b.mosaiknovo19.pages.dev";
+/* -----------------------------
+   SOURCES (SAFE STRUCTURE)
+----------------------------- */
 
-async function getStream(channel){
-  const res = await fetch(`${WORKER_URL}/${channel}`);
-  const data = await res.json();
-  return data.url;
+const channels = {
+
+bfmtv: {
+name: "BFMTV",
+url: "https://www.youtube.com/embed/BuweU-B4ARg?autoplay=1&mute=1"
+},
+
+lci: {
+name: "LCI",
+url: "https://www.youtube.com/embed/live_stream?channel=UC-pYf3g6s8Y2hY5g2V6R8xQ"
+},
+
+cnews: {
+name: "CNEWS",
+url: "https://www.youtube.com/embed/live_stream?channel=UC8p1vx9R1k7Z0Q0Q0Q0Q"
+},
+
+franceinfo: {
+name: "France Info",
+url: "https://www.youtube.com/embed/live_stream?channel=UCQq2b2JQ0Q0Q0Q0Q0Q0Q0Q"
+},
+
+novo19: {
+name: "NOVO19",
+url: "https://www.youtube.com/embed/BuweU-B4ARg?autoplay=1&mute=1"
+},
+
+tf1: {
+name: "TF1",
+url: "https://www.youtube.com/embed/live_stream?channel=UCTF1PLACEHOLDER"
+},
+
+france2: {
+name: "France 2",
+url: "https://www.youtube.com/embed/live_stream?channel=UCFRANCE2PLACEHOLDER"
 }
 
-const groups = {
-  g1: ["bfmtv","lci","cnews","franceinfo"],
-  g2: ["bfmtv","lci","franceinfo","novo19"],
-  g3: ["bfmtv","tf1","france2","cnews"]
 };
 
-const params = new URLSearchParams(location.search);
-const group = params.get("group");
+/* -----------------------------
+   GROUPS
+----------------------------- */
 
-const selected = groups[group];
+const groups = {
+
+g1: [channels.bfmtv, channels.lci, channels.cnews, channels.franceinfo],
+g2: [channels.bfmtv, channels.lci, channels.franceinfo, channels.novo19],
+g3: [channels.bfmtv, channels.tf1, channels.france2, channels.cnews]
+
+};
+
+/* -----------------------------
+   SAFE ROUTING
+----------------------------- */
+
+const params = new URLSearchParams(window.location.search);
+const groupId = params.get("group");
+
+const selected = groups[groupId] || groups.g1;
+
+/* -----------------------------
+   GRID SAFE RENDER
+----------------------------- */
 
 const grid = document.getElementById("grid");
 
-async function load(){
-
-  for(const channel of selected){
+selected.forEach((channel) => {
 
     const tile = document.createElement("div");
     tile.className = "tile";
 
     const label = document.createElement("div");
     label.className = "label";
-    label.innerText = channel;
+    label.textContent = channel.name;
+
+    const iframe = document.createElement("iframe");
+
+    iframe.src = channel.url;
+
+    iframe.setAttribute("allow", "autoplay; encrypted-media");
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.setAttribute("loading", "lazy");
+
+    /* sécurité anti-crash visuel */
+    iframe.style.background = "black";
+
     tile.appendChild(label);
+    tile.appendChild(iframe);
 
-    if(channel === "tf1" || channel === "france2"){
-      const error = document.createElement("div");
-      error.style.color = "white";
-      error.style.display = "flex";
-      error.style.justifyContent = "center";
-      error.style.alignItems = "center";
-      error.style.height = "100%";
-      error.innerText = "Flux non configuré";
-      tile.appendChild(error);
-      grid.appendChild(tile);
-      continue;
-    }
-
-    const video = document.createElement("video");
-    video.autoplay = true;
-    video.muted = true;
-    video.playsInline = true;
-
-    tile.appendChild(video);
     grid.appendChild(tile);
-
-    try{
-
-      const url = await getStream(channel);
-
-      if(Hls.isSupported()){
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-      } else {
-        video.src = url;
-      }
-
-    } catch(e){
-      tile.innerHTML += "<div style='color:white;padding:10px'>Erreur flux</div>";
-    }
-
-  }
-
-}
-
-load();
+});
 
 </script>
 

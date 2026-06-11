@@ -3,13 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mosaïque TV de Martin <3 </title>
+<title>Mosaïque TV de Martin <3</title>
+
 <link rel="stylesheet" href="style.css">
+
+<style>
+
+#dvd-kitten{
+    position:fixed;
+    width:120px;
+    height:auto;
+    z-index:1;
+    pointer-events:none;
+    left:100px;
+    top:100px;
+    transition:
+        transform 0.3s ease,
+        filter 0.5s ease;
+}
+
+.home h1,
+.home .groups{
+    position:relative;
+    z-index:10;
+}
+
+</style>
 </head>
 
 <body class="home">
 
-<h1>Mosaïque TV de Martin <3 </h1>
+<img id="dvd-kitten" src="assets/chaton.png" alt="Chaton">
+
+<h1>Mosaïque TV de Martin <3</h1>
 
 <div class="groups">
 
@@ -28,8 +54,110 @@ BFMTV / TF1 / France 2 / CNEWS
 </div>
 
 <script>
+
 function openGroup(group){
     window.location.href = "mosaic.html?group=" + group;
+}
+
+const kitten = document.getElementById("dvd-kitten");
+
+let x = 100;
+let y = 100;
+
+let dx = 2.2;
+let dy = 2.2;
+
+let scale = 1;
+let rotation = 0;
+
+function animate(){
+
+    x += dx;
+    y += dy;
+
+    const w = kitten.offsetWidth;
+    const h = kitten.offsetHeight;
+
+    if(x <= 0 || x + w >= window.innerWidth){
+
+        dx *= -1;
+
+        if(Math.random() < 0.4){
+            triggerCrazyEffect();
+        }
+    }
+
+    if(y <= 0 || y + h >= window.innerHeight){
+
+        dy *= -1;
+
+        if(Math.random() < 0.4){
+            triggerCrazyEffect();
+        }
+    }
+
+    kitten.style.left = x + "px";
+    kitten.style.top = y + "px";
+
+    requestAnimationFrame(animate);
+}
+
+function triggerCrazyEffect(){
+
+    const effect = Math.floor(Math.random() * 3);
+
+    if(effect === 0){
+
+        scale = 0.8 + Math.random() * 0.8;
+
+        kitten.style.transform =
+            `scale(${scale}) rotate(${rotation}deg)`;
+
+    }
+
+    else if(effect === 1){
+
+        rotation += 360;
+
+        kitten.style.transform =
+            `scale(${scale}) rotate(${rotation}deg)`;
+
+    }
+
+    else{
+
+        scale = 1.5;
+
+        kitten.style.transform =
+            `scale(${scale}) rotate(${rotation}deg)`;
+
+        setTimeout(() => {
+
+            scale = 1;
+
+            kitten.style.transform =
+                `scale(${scale}) rotate(${rotation}deg)`;
+
+        }, 300);
+    }
+}
+
+setInterval(() => {
+
+    if(Math.random() < 0.25){
+
+        triggerCrazyEffect();
+
+    }
+
+}, 5000);
+
+animate();
+
+</script>
+
+</body>
+</html>
 }
 </script>
 

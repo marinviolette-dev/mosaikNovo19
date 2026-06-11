@@ -1,7 +1,3 @@
-
-</script>
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,31 +9,45 @@
 
 <style>
 
-#dvd-kitten{
-    position:fixed;
-    width:120px;
-    height:auto;
-    z-index:1;
-    pointer-events:none;
-    left:100px;
-    top:100px;
-    transition:
-        transform 0.4s ease,
-        filter 0.5s ease;
+body {
+    margin: 0;
+    overflow: hidden;
 }
 
+/* chatons */
+.kitten {
+    position: fixed;
+    width: 100px;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* texte au-dessus */
 .home h1,
-.home .groups{
-    position:relative;
-    z-index:10;
+.home .groups {
+    position: relative;
+    z-index: 10;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.groups {
+    text-align: center;
+    margin-top: 20px;
+}
+
+button {
+    margin: 5px;
 }
 
 </style>
 </head>
 
 <body class="home">
-
-<img id="dvd-kitten" src="asset/chaton.jpeg" alt="Chaton">
 
 <h1>Mosaïque TV de Martin <3</h1>
 
@@ -57,43 +67,49 @@ BFMTV / TF1 / France 2 / CNEWS
 
 </div>
 
-
 <script>
 
 function openGroup(group){
     window.location.href = "mosaic.html?group=" + group;
 }
 
-const baseKitten = document.getElementById("dvd-kitten");
-const kittens = [];
+/* -----------------------------
+   CONFIG
+----------------------------- */
 
 const kittenCount = 7;
+const kittens = [];
 
-/* IMPORTANT : on rend le chaton original invisible (sinon doublon) */
-baseKitten.style.display = "none";
+/* -----------------------------
+   CREATE KITTENS
+----------------------------- */
 
-/* création des 7 chatons */
 for(let i = 0; i < kittenCount; i++){
 
-    const clone = baseKitten.cloneNode(true);
-    clone.style.display = "block";
-    clone.id = "";
+    const el = document.createElement("img");
+    el.src = "asset/chaton.jpeg";
+    el.className = "kitten";
 
-    document.body.appendChild(clone);
+    document.body.appendChild(el);
+
+    const size = 60 + Math.random() * 80;
 
     kittens.push({
-        el: clone,
+        el,
 
-        x: Math.random() * (window.innerWidth - 120),
-        y: Math.random() * (window.innerHeight - 120),
+        x: Math.random() * (window.innerWidth - size),
+        y: Math.random() * (window.innerHeight - size),
 
         dx: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
         dy: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
 
-        scale: 0.6 + Math.random() * 1.2,
-        rotation: Math.random() * 360
+        size: size
     });
 }
+
+/* -----------------------------
+   ANIMATION (DVD STYLE)
+----------------------------- */
 
 function animate(){
 
@@ -102,27 +118,21 @@ function animate(){
         k.x += k.dx;
         k.y += k.dy;
 
-        const w = 120;
-        const h = 120;
+        const size = k.size;
 
-        if(k.x <= 0 || k.x + w >= window.innerWidth){
+        /* rebond */
+        if(k.x <= 0 || k.x + size >= window.innerWidth){
             k.dx *= -1;
         }
 
-        if(k.y <= 0 || k.y + h >= window.innerHeight){
+        if(k.y <= 0 || k.y + size >= window.innerHeight){
             k.dy *= -1;
         }
 
         k.el.style.left = k.x + "px";
         k.el.style.top = k.y + "px";
 
-        k.el.style.width = (80 * k.scale) + "px";
-
-        k.el.style.position = "fixed";
-        k.el.style.zIndex = "1";
-
-        k.el.style.transform =
-            `scale(${k.scale}) rotate(${k.rotation}deg)`;
+        k.el.style.width = size + "px";
     }
 
     requestAnimationFrame(animate);
@@ -131,3 +141,6 @@ function animate(){
 animate();
 
 </script>
+
+</body>
+</html>

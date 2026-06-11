@@ -1,3 +1,116 @@
+<script>
+
+function openGroup(group){
+    window.location.href = "mosaic.html?group=" + group;
+}
+
+/* -----------------------------
+   CONFIG
+----------------------------- */
+
+const kittenCount = 7;
+const kittens = [];
+
+/* -----------------------------
+   INITIALISATION
+----------------------------- */
+
+for(let i = 0; i < kittenCount; i++){
+
+    const el = document.createElement("img");
+    el.src = "asset/chaton.png";
+    el.className = "dvd-kitten";
+    el.style.position = "fixed";
+    el.style.pointerEvents = "none";
+    el.style.zIndex = "1";
+
+    document.body.appendChild(el);
+
+    kittens.push({
+        el: el,
+
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+
+        dx: (Math.random() * 3 + 1.2) * (Math.random() < 0.5 ? -1 : 1),
+        dy: (Math.random() * 3 + 1.2) * (Math.random() < 0.5 ? -1 : 1),
+
+        scale: 0.6 + Math.random() * 1.2,
+        rotation: Math.random() * 360
+    });
+}
+
+/* -----------------------------
+   ANIMATION
+----------------------------- */
+
+function animate(){
+
+    for(const k of kittens){
+
+        k.x += k.dx;
+        k.y += k.dy;
+
+        const w = k.el.offsetWidth || 120;
+        const h = k.el.offsetHeight || 120;
+
+        if(k.x <= 0 || k.x + w >= window.innerWidth){
+            k.dx *= -1;
+            if(Math.random() < 0.4) triggerCrazyEffect(k);
+        }
+
+        if(k.y <= 0 || k.y + h >= window.innerHeight){
+            k.dy *= -1;
+            if(Math.random() < 0.4) triggerCrazyEffect(k);
+        }
+
+        k.el.style.left = k.x + "px";
+        k.el.style.top = k.y + "px";
+
+        k.el.style.width = (80 * k.scale) + "px";
+
+        k.el.style.transform =
+            `scale(${k.scale}) rotate(${k.rotation}deg)`;
+    }
+
+    requestAnimationFrame(animate);
+}
+
+/* -----------------------------
+   EFFETS
+----------------------------- */
+
+function triggerCrazyEffect(k){
+
+    const effect = Math.floor(Math.random() * 3);
+
+    if(effect === 0){
+
+        k.scale = 0.6 + Math.random() * 1.4;
+
+    } else if(effect === 1){
+
+        k.rotation += 360;
+
+    } else {
+
+        k.scale = 1.8;
+
+        setTimeout(() => {
+            k.scale = 0.8 + Math.random() * 1.2;
+        }, 300);
+    }
+}
+
+/* -----------------------------
+   START
+----------------------------- */
+
+animate();
+
+</script>
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

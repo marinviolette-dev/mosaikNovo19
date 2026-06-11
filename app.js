@@ -17,7 +17,7 @@ url: "https://www.cnews.fr/le-direct"
 
 franceinfo: {
 name: "France Info",
-url: "https://www.franceinfo.fr/en-direct/tv.html"
+url: "https://www.youtube.com/watch?v=NG7ZX42nZKc"
 },
 
 novo19: {

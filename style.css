@@ -46,7 +46,7 @@ z-index:999;
 padding:10px 15px;
 }
 
-.grid{
+#grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 grid-template-rows:1fr 1fr;

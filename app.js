@@ -2,7 +2,7 @@ const channels = {
 
 bfmtv: {
 name: "BFMTV",
-url: "https://www.youtube.com/embed/BuweU-B4ARg?autoplay=1&mute=1"
+url: "https://s6.tntendirect.com/bmftv/live/playlist.m3u8"
 },
 
 lci: {

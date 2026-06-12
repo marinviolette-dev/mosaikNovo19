@@ -12,7 +12,7 @@ url: "https://www.youtube.com/embed/live_stream?channel=UC-pYf3g6s8Y2hY5g2V6R8xQ
 
 cnews: {
 name: "CNEWS",
-url: "https://www.youtube.com/embed/live_stream?channel=UCI8JpQ8G5QJ7c3Qp5z9Yx1g"
+url: "https://hls-m015-live-aka-canalplus.akamaized.net/live/disk/cnews-clair-hd/hls-v3-hd-clair/cnews-clair-hd.m3u8", cat:"info", needsProxy:false}"
 },
 
 franceinfo: {

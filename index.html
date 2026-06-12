@@ -21,6 +21,9 @@ body {
     height: auto;
     z-index: 1;
     pointer-events: none;
+    transition:
+        transform 1s linear,
+        filter 0.5s ease;
 }
 
 /* texte au-dessus */
@@ -80,6 +83,21 @@ function openGroup(group){
 const kittenCount = 14;
 const kittens = [];
 
+const colorFilters = [
+    "hue-rotate(0deg)",
+    "hue-rotate(45deg)",
+    "hue-rotate(90deg)",
+    "hue-rotate(135deg)",
+    "hue-rotate(180deg)",
+    "hue-rotate(225deg)",
+    "hue-rotate(270deg)",
+    "hue-rotate(315deg)",
+    "saturate(2)",
+    "sepia(1)",
+    "invert(1)",
+    "contrast(1.5)"
+];
+
 /* -----------------------------
    CREATE KITTENS
 ----------------------------- */
@@ -103,9 +121,41 @@ for(let i = 0; i < kittenCount; i++){
         dx: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
         dy: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
 
-        size: size
+        size: size,
 
+        rotation: 0,
+        spinning: false
     });
+}
+
+/* -----------------------------
+   COULEUR ALÉATOIRE
+----------------------------- */
+
+function randomColorFilter(){
+
+    return colorFilters[
+        Math.floor(Math.random() * colorFilters.length)
+    ];
+}
+
+/* -----------------------------
+   ROTATION 360°
+----------------------------- */
+
+function spinKitten(k){
+
+    if(k.spinning) return;
+
+    k.spinning = true;
+    k.rotation += 360;
+
+    k.el.style.transform =
+        `rotate(${k.rotation}deg)`;
+
+    setTimeout(() => {
+        k.spinning = false;
+    }, 1000);
 }
 
 /* -----------------------------
@@ -121,13 +171,27 @@ function animate(){
 
         const size = k.size;
 
-        /* rebond */
+        let bounced = false;
+
+        /* rebond horizontal */
         if(k.x <= 0 || k.x + size >= window.innerWidth){
             k.dx *= -1;
+            bounced = true;
         }
 
+        /* rebond vertical */
         if(k.y <= 0 || k.y + size >= window.innerHeight){
             k.dy *= -1;
+            bounced = true;
+        }
+
+        if(bounced){
+
+            k.el.style.filter = randomColorFilter();
+
+            if(Math.random() < 0.5){
+                spinKitten(k);
+            }
         }
 
         k.el.style.left = k.x + "px";
@@ -140,6 +204,21 @@ function animate(){
 }
 
 animate();
+
+/* -----------------------------
+   ROTATIONS ALÉATOIRES
+----------------------------- */
+
+setInterval(() => {
+
+    const randomKitten =
+        kittens[Math.floor(Math.random() * kittens.length)];
+
+    if(Math.random() < 0.35){
+        spinKitten(randomKitten);
+    }
+
+}, 2000);
 
 </script>
 

@@ -2,7 +2,7 @@ const channels = {
 
 bfmtv: {
 name: "BFMTV",
-url: "https://s6.tntendirect.com/bmftv/live/playlist.m3u8"
+url: "https://live-cdn-bfmtv-euw1.bfmtv.bct.nextradiotv.com/m1/media.m3u8"
 },
 
 lci: {

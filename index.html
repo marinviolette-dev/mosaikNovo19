@@ -23,7 +23,7 @@ body {
     pointer-events: none;
     transition:
         transform 1s linear,
-        filter 0.5s ease;
+        filter 0.15s linear;
 }
 
 /* texte au-dessus */
@@ -76,10 +76,6 @@ function openGroup(group){
     window.location.href = "mosaic.html?group=" + group;
 }
 
-/* -----------------------------
-   CONFIG
------------------------------ */
-
 const kittenCount = 14;
 const kittens = [];
 
@@ -98,10 +94,6 @@ const colorFilters = [
     "contrast(1.5)"
 ];
 
-/* -----------------------------
-   CREATE KITTENS
------------------------------ */
-
 for(let i = 0; i < kittenCount; i++){
 
     const el = document.createElement("img");
@@ -114,23 +106,16 @@ for(let i = 0; i < kittenCount; i++){
 
     kittens.push({
         el,
-
         x: Math.random() * (window.innerWidth - size),
         y: Math.random() * (window.innerHeight - size),
-
         dx: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
         dy: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
-
         size: size,
-
         rotation: 0,
-        spinning: false
+        spinning: false,
+        rainbowInterval: null
     });
 }
-
-/* -----------------------------
-   COULEUR ALÉATOIRE
------------------------------ */
 
 function randomColorFilter(){
 
@@ -138,10 +123,6 @@ function randomColorFilter(){
         Math.floor(Math.random() * colorFilters.length)
     ];
 }
-
-/* -----------------------------
-   ROTATION 360°
------------------------------ */
 
 function spinKitten(k){
 
@@ -158,13 +139,25 @@ function spinKitten(k){
     }, 1000);
 }
 
-/* -----------------------------
-   IMAGE ALÉATOIRE
-   70% chaton
-   10% marin
-   10% valentin
-   10% Martin
------------------------------ */
+function startRainbow(k){
+
+    stopRainbow(k);
+
+    k.rainbowInterval = setInterval(() => {
+
+        k.el.style.filter = randomColorFilter();
+
+    }, 120);
+}
+
+function stopRainbow(k){
+
+    if(k.rainbowInterval){
+
+        clearInterval(k.rainbowInterval);
+        k.rainbowInterval = null;
+    }
+}
 
 function randomImage(){
 
@@ -185,10 +178,6 @@ function randomImage(){
     return "asset/chaton.jpeg";
 }
 
-/* -----------------------------
-   ANIMATION (DVD STYLE)
------------------------------ */
-
 function animate(){
 
     for(const k of kittens){
@@ -200,13 +189,11 @@ function animate(){
 
         let bounced = false;
 
-        /* rebond horizontal */
         if(k.x <= 0 || k.x + size >= window.innerWidth){
             k.dx *= -1;
             bounced = true;
         }
 
-        /* rebond vertical */
         if(k.y <= 0 || k.y + size >= window.innerHeight){
             k.dy *= -1;
             bounced = true;
@@ -214,9 +201,21 @@ function animate(){
 
         if(bounced){
 
-            k.el.style.filter = randomColorFilter();
+            const newImage = randomImage();
 
-            k.el.src = randomImage();
+            k.el.src = newImage;
+
+            if(
+                newImage.includes("marin.png") ||
+                newImage.includes("valentin.png") ||
+                newImage.includes("Martin.png")
+            ){
+                startRainbow(k);
+            }
+            else{
+                stopRainbow(k);
+                k.el.style.filter = randomColorFilter();
+            }
 
             if(Math.random() < 0.5){
                 spinKitten(k);
@@ -225,7 +224,6 @@ function animate(){
 
         k.el.style.left = k.x + "px";
         k.el.style.top = k.y + "px";
-
         k.el.style.width = size + "px";
     }
 
@@ -233,10 +231,6 @@ function animate(){
 }
 
 animate();
-
-/* -----------------------------
-   ROTATIONS ALÉATOIRES
------------------------------ */
 
 setInterval(() => {
 

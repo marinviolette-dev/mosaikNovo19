@@ -7,7 +7,7 @@ url: "https://live-cdn-bfmtv-euw1.bfmtv.bct.nextradiotv.com/m1/media.m3u8"
 
 lci: {
 name: "LCI",
-url: "https://www.youtube.com/embed/live_stream?channel=UC-pYf3g6s8Y2hY5g2V6R8xQ"
+url: "https://www.tf1info.fr/direct/"
 },
 
 cnews: {

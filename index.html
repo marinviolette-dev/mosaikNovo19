@@ -160,21 +160,25 @@ function spinKitten(k){
 
 /* -----------------------------
    IMAGE ALÉATOIRE
+   70% chaton
+   10% marin
+   10% valentin
+   10% martin
 ----------------------------- */
 
 function randomImage(){
 
     const r = Math.random();
 
-    if(r < 0.03){
+    if(r < 0.10){
         return "asset/marin.png";
     }
 
-    if(r < 0.06){
+    if(r < 0.20){
         return "asset/valentin.png";
     }
 
-    if(r < 0.09){
+    if(r < 0.30){
         return "asset/martin.png";
     }
 
@@ -212,7 +216,6 @@ function animate(){
 
             k.el.style.filter = randomColorFilter();
 
-            /* changement éventuel d'image */
             k.el.src = randomImage();
 
             if(Math.random() < 0.5){

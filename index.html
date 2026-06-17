@@ -159,6 +159,29 @@ function spinKitten(k){
 }
 
 /* -----------------------------
+   IMAGE ALÉATOIRE
+----------------------------- */
+
+function randomImage(){
+
+    const r = Math.random();
+
+    if(r < 0.03){
+        return "asset/marin.png";
+    }
+
+    if(r < 0.06){
+        return "asset/valentin.png";
+    }
+
+    if(r < 0.09){
+        return "asset/martin.png";
+    }
+
+    return "asset/chaton.jpeg";
+}
+
+/* -----------------------------
    ANIMATION (DVD STYLE)
 ----------------------------- */
 
@@ -188,6 +211,9 @@ function animate(){
         if(bounced){
 
             k.el.style.filter = randomColorFilter();
+
+            /* changement éventuel d'image */
+            k.el.src = randomImage();
 
             if(Math.random() < 0.5){
                 spinKitten(k);

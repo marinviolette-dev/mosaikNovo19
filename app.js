@@ -17,7 +17,7 @@ url: "https://hls-m015-live-aka-canalplus.akamaized.net/live/disk/cnews-clair-hd
 
 franceinfo: {
 name: "France Info",
-url: "https://www.youtube.com/embed/live_stream?channel=UCQq2b2JQ0Q0Q0Q0Q0Q0Q0Q"
+url: "https://www.youtube.com/watch?v=NG7ZX42nZKc"
 },
 
 novo19: {

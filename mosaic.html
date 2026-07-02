@@ -50,6 +50,28 @@ iframe {
     border: none;
 }
 
+/* OFFLINE */
+.offline {
+    position: absolute;
+    inset: 0;
+    background: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+}
+
+.offline h2 {
+    margin: 0;
+}
+
+.offline small {
+    color: #bbb;
+}
+
 </style>
 </head>
 
@@ -103,9 +125,9 @@ url: "https://www.youtube.com/embed/live_stream?channel=UC2FRANCEPLACEHOLDER"
 Arte: {
 name: "Arte",
 url: "https://www.arte.tv/fr/direct/"
-}    
+}
 
-    };
+};
 
 /* -----------------------------
    GROUPS
@@ -117,7 +139,7 @@ g1: [channels.bfmtv, channels.cnews, channels.lci, channels.franceinfo],
 g2: [channels.bfmtv, channels.lci, channels.franceinfo, channels.novo19],
 g3: [channels.bfmtv, channels.tf1, channels.france2, channels.cnews],
 g4: [channels.Arte, channels.bfmtv, channels.lci, channels.novo19],
-g5: [channels.cnews, channels.cnews, channels.cnews, channels.cnews]     
+g5: [channels.cnews, channels.cnews, channels.cnews, channels.cnews]
 
 };
 
@@ -129,6 +151,42 @@ const params = new URLSearchParams(window.location.search);
 const groupId = params.get("group");
 
 const selected = groups[groupId] || groups.g1;
+
+/* -----------------------------
+   RECONNECT
+----------------------------- */
+
+function reconnectTile(tile, channel){
+
+    tile.innerHTML = `
+        <div class="offline">
+            <h2>${channel.name}</h2>
+            <div>⚠ Flux indisponible</div>
+            <small>Nouvelle tentative dans 30 s...</small>
+        </div>
+    `;
+
+    setTimeout(() => {
+
+        tile.innerHTML = "";
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = channel.name;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = channel.url;
+
+        iframe.setAttribute("allow","autoplay; encrypted-media");
+        iframe.setAttribute("allowfullscreen","");
+        iframe.setAttribute("loading","lazy");
+
+        tile.appendChild(label);
+        tile.appendChild(iframe);
+
+    },30000);
+
+}
 
 /* -----------------------------
    GRID SAFE RENDER
@@ -153,13 +211,25 @@ selected.forEach((channel) => {
     iframe.setAttribute("allowfullscreen", "");
     iframe.setAttribute("loading", "lazy");
 
-    /* sécurité anti-crash visuel */
     iframe.style.background = "black";
+
+    let loaded = false;
+
+    iframe.onload = () => {
+        loaded = true;
+    };
+
+    setTimeout(() => {
+        if (!loaded) {
+            reconnectTile(tile, channel);
+        }
+    }, 8000);
 
     tile.appendChild(label);
     tile.appendChild(iframe);
 
     grid.appendChild(tile);
+
 });
 
 </script>

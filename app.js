@@ -22,7 +22,7 @@ url: "https://www.youtube.com/watch?v=NG7ZX42nZKc"
 
 novo19: {
 name: "NOVO19",
-url: "https://poland.assistancefrancaise.com/hls/transcoder03/8/tracks-v1a1/mono.ts.m3u8"
+url: "https://novo19.ouest-france.fr/player/novo19"
 },
 
 tf1: {

@@ -33,4 +33,9 @@ url: "https://www.youtube.com/embed/live_stream?channel=UC1TF1PLACEHOLDER"
 france2: {
 name: "France 2",
 url: "https://www.youtube.com/embed/live_stream?channel=UC2FRANCEPLACEHOLDER"
-}
+},
+
+Arte: {
+name: "Arte",
+url: "https://www.arte.tv/fr/direct/"
+}  

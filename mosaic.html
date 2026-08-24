@@ -81,12 +81,56 @@ iframe {
     color: #bbb;
 }
 
+/* -----------------------------
+   STINGER
+----------------------------- */
+
+#stinger {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.stinger-layer {
+    position: absolute;
+    inset: 0;
+    transform: translateX(100%);
+}
+
+.stinger-layer.purple {
+    background: #6f00ff;
+    transform: translateX(-100%);
+}
+
+.stinger-layer.cream {
+    background: #f9f2ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(0%);
+}
+
+.stinger-layer.cream .logo {
+    font-family: "Century Gothic", "CenturyGothic", Arial, sans-serif;
+    font-weight: 700;
+    color: #6f00ff;
+    font-size: 8vw;
+    letter-spacing: 2px;
+}
+
 </style>
 </head>
 
 <body>
 
 <div id="grid"></div>
+
+<div id="stinger">
+    <div class="stinger-layer purple"></div>
+    <div class="stinger-layer cream"><span class="logo">Novo19</span></div>
+</div>
 
 <script>
 
@@ -168,6 +212,10 @@ g5: [channels.tf1, channels.france2, channels.bfmtv, channels.cnews, channels.lc
 
 const params = new URLSearchParams(window.location.search);
 const groupId = params.get("group");
+
+if (!groupId || !groups[groupId]) {
+    window.location.href = "home.html";
+}
 
 const selected = groups[groupId] || groups.g1;
 
@@ -253,6 +301,25 @@ selected.forEach((channel) => {
     tile.appendChild(iframe);
 
     grid.appendChild(tile);
+
+});
+
+/* -----------------------------
+   STINGER : l'écran est masqué par le crème "Novo19"
+   au chargement, puis balaie vers la gauche pour
+   révéler la mosaïque
+----------------------------- */
+
+window.addEventListener("load", () => {
+
+    const cream = document.querySelector(".stinger-layer.cream");
+
+    setTimeout(() => {
+
+        cream.style.transition = "transform 0.5s ease-in";
+        cream.style.transform = "translateX(-100%)";
+
+    }, 400);
 
 });
 

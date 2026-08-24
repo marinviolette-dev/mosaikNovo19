@@ -22,6 +22,12 @@ body {
     height: 100vh;
 }
 
+/* GRID 3x3 (groupe 5) */
+#grid.grid-3x3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+}
+
 /* CHAQUE TILE */
 .tile {
     position: relative;
@@ -139,7 +145,7 @@ g1: [channels.bfmtv, channels.cnews, channels.lci, channels.franceinfo],
 g2: [channels.bfmtv, channels.franceinfo, channels.lci, channels.novo19],
 g3: [channels.bfmtv, channels.cnews, channels.tf1, channels.france2],
 g4: [channels.bfmtv, channels.novo19, channels.arte, channels.lci],
-g5: [channels.cnews, channels.cnews, channels.cnews, channels.cnews]
+g5: [channels.cnews]
 
 };
 
@@ -193,6 +199,11 @@ function reconnectTile(tile, channel){
 ----------------------------- */
 
 const grid = document.getElementById("grid");
+
+/* Groupe 5 : grille 3x3 au lieu de 2x2 */
+if (groupId === "g5") {
+    grid.classList.add("grid-3x3");
+}
 
 selected.forEach((channel) => {
 

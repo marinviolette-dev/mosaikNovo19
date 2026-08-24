@@ -1,84 +1,50 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mosaïque TV</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mosaïque TV de Martin <3</title>
+
+<link rel="stylesheet" href="style.css">
 
 <style>
 
 body {
     margin: 0;
-    background: black;
-    font-family: Arial;
-}
-
-/* GRID 2x2 */
-#grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    width: 100vw;
-    height: 100vh;
-    gap: 2px;
-    padding: 2px;
-    background: #6f00ff;
-    box-sizing: border-box;
-}
-
-/* GRID 3x3 (groupe 5) */
-#grid.grid-3x3 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
-
-/* CHAQUE TILE */
-.tile {
-    position: relative;
     overflow: hidden;
-    background: black;
 }
 
-/* LABEL */
-.label {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    z-index: 2;
-    color: white;
-    font-size: 14px;
-    background: rgba(0,0,0,0.6);
-    padding: 3px 6px;
-    border-radius: 4px;
+/* chatons */
+.kitten {
+    position: fixed;
+    width: 100px;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+    transition:
+        transform 1s linear,
+        filter 0.15s linear;
 }
 
-/* IFRAME */
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
+/* texte au-dessus */
+.home h1,
+.home .groups {
+    position: relative;
+    z-index: 10;
 }
 
-/* OFFLINE */
-.offline {
-    position: absolute;
-    inset: 0;
-    background: #111;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+h1 {
     text-align: center;
-    gap: 10px;
+    margin-top: 20px;
 }
 
-.offline h2 {
-    margin: 0;
+.groups {
+    text-align: center;
+    margin-top: 20px;
 }
 
-.offline small {
-    color: #bbb;
+button {
+    margin: 5px;
 }
 
 /* -----------------------------
@@ -101,7 +67,6 @@ iframe {
 
 .stinger-layer.purple {
     background: #6f00ff;
-    transform: translateX(-100%);
 }
 
 .stinger-layer.cream {
@@ -109,7 +74,6 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: translateX(0%);
 }
 
 .stinger-layer.cream .logo {
@@ -123,9 +87,33 @@ iframe {
 </style>
 </head>
 
-<body>
+<body class="home">
 
-<div id="grid"></div>
+<h1>Mosaïque TV de Martin <3</h1>
+
+<div class="groups">
+
+<button onclick="openGroup('g1')">
+BFMTV / LCI / CNEWS / France Info
+</button>
+
+<button onclick="openGroup('g2')">
+BFMTV / LCI / France Info / NOVO19
+</button>
+
+<button onclick="openGroup('g3')">
+BFMTV / TF1 / France 2 / CNEWS
+</button>
+
+<button onclick="openGroup('g4')">
+Arte / BFMTV / LCI / NOVO19
+</button>    
+
+<button onclick="openGroup('g5')">
+Groupe étendu
+</button>      
+
+</div>
 
 <div id="stinger">
     <div class="stinger-layer purple"></div>
@@ -135,189 +123,209 @@ iframe {
 <script>
 
 /* -----------------------------
-   SOURCES (SAFE STRUCTURE)
+   STINGER : balayage droite -> gauche avant navigation
 ----------------------------- */
 
-const channels = {
-
-bfmtv: {
-name: "BFMTV",
-url: "https://live-cdn-bfmtv-euw1.bfmtv.bct.nextradiotv.com/m1/media.m3u8"
-},
-
-lci: {
-name: "LCI",
-url: "https://alive-lci-hls.cdn-0.diff.tf1.fr/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaXAiOiIxODUuMzEuNDAuMjYiLCJjbWNkIjoiIiwiZXhwIjoxNzg3NTc4ODE5LCJnaWQiOiI3OTU4ZGMzZi0yYTk1LTRiMmItYjZjYy0zYTMwYTE0ODRmOWMiLCJpYXQiOjE3ODc1NjQ0MTksImlzcyI6ImRlbGl2ZXJ5IiwibWF4YiI6MCwic3RlbSI6Ii9wcm9kL0xDSS9jbWFmL291dCIsInN1YiI6Ijc5NThkYzNmLTJhOTUtNGIyYi1iNmNjLTNhMzBhMTQ4NGY5YyJ9.JN3jAuEJot_XM16ejpMkIOoOkDBDiv_0E34ST504mgw/prod/LCI/cmaf/out/LCI.m3u8"
-},
-
-cnews: {
-name: "CNEWS",
-url: "https://hls-m015-live-aka-canalplus.akamaized.net/live/disk/cnews-clair-hd/hls-v3-hd-clair/cnews-clair-hd.m3u8"
-},
-
-franceinfo: {
-name: "France Info",
-url: "https://www.youtube.com/embed/NG7ZX42nZKc?autoplay=1&mute=1&controls=0&modestbranding=1"
-},
-
-novo19: {
-name: "NOVO19",
-url: "https://novo19.ouest-france.fr/player/novo19"
-},
-
-tf1: {
-name: "TF1",
-url: "https://euronews-live-fre-fr.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6564/bitok/e/26032/euronews-fr.m3u8"
-},
-
-france2: {
-name: "France 2",
-url: "https://rcavlive.akamaized.net/hls/live/704025/xcanrdi/master.m3u8"
-},
-
-arte: {
-name: "Arte",
-url: "https://artesimulcast.akamaized.net/hls/live/2031003/artelive_fr/index.m3u8"
-},
-
-rmcstory: {
-name: "RMC Story",
-url: "https://live-cdn-rmcstor-lg-fr-euw1.rmc.bct.nextradiotv.com/master.m3u8?bpkio_sessionid=10b0c236c226-ae1d9b34-e3c6-430e-9f23-c1c0db5c0f65&bpkio_serviceid=7de32147a4f1055b03f1535ffa098237&category=all"
-},
-
-rmclife: {
-name: "RMC Life",
-url: "http://s2.callofliberty.fr/direct/RMCDECOUVERTE/manifest.m3u8"
-}    
-
-};
-
-/* -----------------------------
-   GROUPS
------------------------------ */
-
-const groups = {
-
-g1: [channels.bfmtv, channels.cnews, channels.lci, channels.franceinfo],
-g2: [channels.bfmtv, channels.franceinfo, channels.lci, channels.novo19],
-g3: [channels.bfmtv, channels.cnews, channels.tf1, channels.france2],
-g4: [channels.bfmtv, channels.novo19, channels.arte, channels.lci],
-g5: [channels.tf1, channels.france2, channels.bfmtv, channels.cnews, channels.lci, channels.franceinfo, channels.novo19, channels.rmcstory, channels.rmclife],
-
-};
-
-/* -----------------------------
-   SAFE ROUTING
------------------------------ */
-
-const params = new URLSearchParams(window.location.search);
-const groupId = params.get("group");
-
-const selected = groups[groupId] || groups.g1;
-
-/* -----------------------------
-   RECONNECT
------------------------------ */
-
-function reconnectTile(tile, channel){
-
-    tile.innerHTML = `
-        <div class="offline">
-            <h2>${channel.name}</h2>
-            <div>⚠ Flux indisponible</div>
-            <small>Nouvelle tentative dans 30 s...</small>
-        </div>
-    `;
-
-    setTimeout(() => {
-
-        tile.innerHTML = "";
-
-        const label = document.createElement("div");
-        label.className = "label";
-        label.textContent = channel.name;
-
-        const iframe = document.createElement("iframe");
-        iframe.src = channel.url;
-
-        iframe.setAttribute("allow","autoplay; encrypted-media");
-        iframe.setAttribute("allowfullscreen","");
-        iframe.setAttribute("loading","lazy");
-
-        tile.appendChild(label);
-        tile.appendChild(iframe);
-
-    },30000);
-
+function openGroup(group){
+    playStingerOut(group);
 }
 
-/* -----------------------------
-   GRID SAFE RENDER
------------------------------ */
+function playStingerOut(group){
 
-const grid = document.getElementById("grid");
-
-/* Groupe 5 : grille 3x3 au lieu de 2x2 */
-if (groupId === "g5") {
-    grid.classList.add("grid-3x3");
-}
-
-selected.forEach((channel) => {
-
-    const tile = document.createElement("div");
-    tile.className = "tile";
-
-    const label = document.createElement("div");
-    label.className = "label";
-    label.textContent = channel.name;
-
-    const iframe = document.createElement("iframe");
-
-    iframe.src = channel.url;
-
-    iframe.setAttribute("allow", "autoplay; encrypted-media");
-    iframe.setAttribute("allowfullscreen", "");
-    iframe.setAttribute("loading", "lazy");
-
-    iframe.style.background = "black";
-
-    let loaded = false;
-
-    iframe.onload = () => {
-        loaded = true;
-    };
-
-    setTimeout(() => {
-        if (!loaded) {
-            reconnectTile(tile, channel);
-        }
-    }, 8000);
-
-    tile.appendChild(label);
-    tile.appendChild(iframe);
-
-    grid.appendChild(tile);
-
-});
-
-/* -----------------------------
-   STINGER : l'écran est masqué par le crème "Novo19"
-   au chargement, puis balaie vers la gauche pour
-   révéler la mosaïque
------------------------------ */
-
-window.addEventListener("load", () => {
-
+    const purple = document.querySelector(".stinger-layer.purple");
     const cream = document.querySelector(".stinger-layer.cream");
 
+    /* Étape 1 : le mauve balaie et recouvre l'écran */
+    purple.style.transition = "transform 0.45s ease-in";
+    purple.style.transform = "translateX(0%)";
+
     setTimeout(() => {
 
-        cream.style.transition = "transform 0.5s ease-in";
-        cream.style.transform = "translateX(-100%)";
+        /* Étape 2 : le crème (Novo19) arrive juste derrière,
+           le mauve continue sa course et sort par la gauche */
+        cream.style.transition = "transform 0.45s ease-in";
+        cream.style.transform = "translateX(0%)";
 
-    }, 400);
+        purple.style.transition = "transform 0.45s ease-in";
+        purple.style.transform = "translateX(-100%)";
 
-});
+    }, 350);
+
+    setTimeout(() => {
+
+        /* Étape 3 : l'écran est totalement masqué, on navigue */
+        window.location.href = "mosaic.html?group=" + group;
+
+    }, 900);
+
+}
+
+const kittenCount = 14;
+const kittens = [];
+
+const colorFilters = [
+    "hue-rotate(0deg)",
+    "hue-rotate(45deg)",
+    "hue-rotate(90deg)",
+    "hue-rotate(135deg)",
+    "hue-rotate(180deg)",
+    "hue-rotate(225deg)",
+    "hue-rotate(270deg)",
+    "hue-rotate(315deg)",
+    "saturate(2)",
+    "sepia(1)",
+    "invert(1)",
+    "contrast(1.5)"
+];
+
+for(let i = 0; i < kittenCount; i++){
+
+    const el = document.createElement("img");
+    el.src = "asset/chaton.jpeg";
+    el.className = "kitten";
+
+    document.body.appendChild(el);
+
+    const size = 80 + Math.random() * 80;
+
+    kittens.push({
+        el,
+        x: Math.random() * (window.innerWidth - size),
+        y: Math.random() * (window.innerHeight - size),
+        dx: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
+        dy: (Math.random() * 3 + 1.5) * (Math.random() < 0.5 ? -1 : 1),
+        size: size,
+        rotation: 0,
+        spinning: false,
+        rainbowInterval: null
+    });
+}
+
+function randomColorFilter(){
+
+    return colorFilters[
+        Math.floor(Math.random() * colorFilters.length)
+    ];
+}
+
+function spinKitten(k){
+
+    if(k.spinning) return;
+
+    k.spinning = true;
+    k.rotation += 360;
+
+    k.el.style.transform =
+        `rotate(${k.rotation}deg)`;
+
+    setTimeout(() => {
+        k.spinning = false;
+    }, 1000);
+}
+
+function startRainbow(k){
+
+    stopRainbow(k);
+
+    k.rainbowInterval = setInterval(() => {
+
+        k.el.style.filter = randomColorFilter();
+
+    }, 120);
+}
+
+function stopRainbow(k){
+
+    if(k.rainbowInterval){
+
+        clearInterval(k.rainbowInterval);
+        k.rainbowInterval = null;
+    }
+}
+
+function randomImage(){
+
+    const r = Math.random();
+
+    if(r < 0.10){
+        return "asset/marin.png";
+    }
+
+    if(r < 0.20){
+        return "asset/valentin.png";
+    }
+
+    if(r < 0.30){
+        return "asset/Martin.png";
+    }
+
+    return "asset/chaton.jpeg";
+}
+
+function animate(){
+
+    for(const k of kittens){
+
+        k.x += k.dx;
+        k.y += k.dy;
+
+        const size = k.size;
+
+        let bounced = false;
+
+        if(k.x <= 0 || k.x + size >= window.innerWidth){
+            k.dx *= -1;
+            bounced = true;
+        }
+
+        if(k.y <= 0 || k.y + size >= window.innerHeight){
+            k.dy *= -1;
+            bounced = true;
+        }
+
+        if(bounced){
+
+            const newImage = randomImage();
+
+            k.el.src = newImage;
+
+            if(
+                newImage.includes("marin.png") ||
+                newImage.includes("valentin.png") ||
+                newImage.includes("Martin.png")
+            ){
+                startRainbow(k);
+            }
+            else{
+                stopRainbow(k);
+                k.el.style.filter = randomColorFilter();
+            }
+
+            if(Math.random() < 0.5){
+                spinKitten(k);
+            }
+        }
+
+        k.el.style.left = k.x + "px";
+        k.el.style.top = k.y + "px";
+        k.el.style.width = size + "px";
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+setInterval(() => {
+
+    const randomKitten =
+        kittens[Math.floor(Math.random() * kittens.length)];
+
+    if(Math.random() < 0.35){
+        spinKitten(randomKitten);
+    }
+
+}, 2000);
 
 </script>
 

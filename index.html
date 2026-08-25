@@ -130,6 +130,21 @@ function openGroup(group){
     playStingerOut(group);
 }
 
+/* Réinitialise le stinger, y compris quand la page est restaurée
+   depuis le cache de navigation (bouton retour) */
+window.addEventListener("pageshow", function(){
+
+    const purple = document.querySelector(".stinger-layer.purple");
+    const cream = document.querySelector(".stinger-layer.cream");
+
+    purple.style.transition = "none";
+    cream.style.transition = "none";
+
+    purple.style.transform = "translateX(100%)";
+    cream.style.transform = "translateX(100%)";
+
+});
+
 function playStingerOut(group){
 
     const purple = document.querySelector(".stinger-layer.purple");

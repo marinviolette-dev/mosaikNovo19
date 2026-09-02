@@ -82,6 +82,76 @@ iframe {
 }
 
 /* -----------------------------
+   REFRESH LINK OVERLAY
+----------------------------- */
+
+.refresh-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tile:hover .refresh-btn {
+    opacity: 1;
+}
+
+.refresh-btn.hidden {
+    display: none;
+}
+
+.link-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    height: 0;
+    overflow: hidden;
+    background: #6f00ff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    transition: height 0.25s ease, padding 0.25s ease;
+}
+
+.link-bar.open {
+    height: 34px;
+    padding: 0 8px;
+}
+
+.link-bar input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 13px;
+    outline: none;
+}
+
+.link-bar .link-bar-hint {
+    color: white;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* -----------------------------
    STINGER
 ----------------------------- */
 
@@ -147,7 +217,7 @@ url: "https://live-cdn-bfmtv-euw1.bfmtv.bct.nextradiotv.com/m1/media.m3u8"
 
 lci: {
 name: "LCI",
-url: "https://alive-lci-hls.cdn-0.diff.tf1.fr/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaXAiOiIxODUuMzEuNDAuMjYiLCJjbWNkIjoiIiwiZXhwIjoxNzg4MzUyODQxLCJnaWQiOiJmMjlmM2YyMy05ZjQ3LTRmMzUtOTAzNS0yY2Q2NGExMjJlMTYiLCJpYXQiOjE3ODgzMzg0NDEsImlzcyI6ImRlbGl2ZXJ5IiwibWF4YiI6MCwic3RlbSI6Ii9wcm9kL0xDSS9jbWFmL291dCIsInN1YiI6ImYyOWYzZjIzLTlmNDctNGYzNS05MDM1LTJjZDY0YTEyMmUxNiJ9.JitaJmSVd1m_m8NaXMHVBmJ0WC6jiCNCK0T0oymZKJQ/prod/LCI/cmaf/out/LCI.m3u8"
+url: "https://alive-lci-hls.cdn-0.diff.tf1.fr/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaXAiOiIxODUuMzEuNDAuMjYiLCJjbWNkIjoiIiwiZXhwIjoxNzg3NTc4ODE5LCJnaWQiOiI3OTU4ZGMzZi0yYTk1LTRiMmItYjZjYy0zYTMwYTE0ODRmOWMiLCJpYXQiOjE3ODc1NjQ0MTksImlzcyI6ImRlbGl2ZXJ5IiwibWF4YiI6MCwic3RlbSI6Ii9wcm9kL0xDSS9jbWFmL291dCIsInN1YiI6Ijc5NThkYzNmLTJhOTUtNGIyYi1iNmNjLTNhMzBhMTQ4NGY5YyJ9.JN3jAuEJot_XM16ejpMkIOoOkDBDiv_0E34ST504mgw/prod/LCI/cmaf/out/LCI.m3u8"
 },
 
 cnews: {
@@ -220,10 +290,26 @@ if (!groupId || !groups[groupId]) {
 const selected = groups[groupId] || groups.g1;
 
 /* -----------------------------
+   LIEN PERSONNALISÉ (localStorage)
+----------------------------- */
+
+function getStoredUrl(channelKey) {
+    return localStorage.getItem("mosaic-link-" + channelKey);
+}
+
+function setStoredUrl(channelKey, url) {
+    localStorage.setItem("mosaic-link-" + channelKey, url);
+}
+
+function getEffectiveUrl(channelKey, channel) {
+    return getStoredUrl(channelKey) || channel.url;
+}
+
+/* -----------------------------
    RECONNECT
 ----------------------------- */
 
-function reconnectTile(tile, channel){
+function reconnectTile(tile, channelKey, channel){
 
     tile.innerHTML = `
         <div class="offline">
@@ -234,42 +320,19 @@ function reconnectTile(tile, channel){
     `;
 
     setTimeout(() => {
-
-        tile.innerHTML = "";
-
-        const label = document.createElement("div");
-        label.className = "label";
-        label.textContent = channel.name;
-
-        const iframe = document.createElement("iframe");
-        iframe.src = channel.url;
-
-        iframe.setAttribute("allow","autoplay; encrypted-media");
-        iframe.setAttribute("allowfullscreen","");
-        iframe.setAttribute("loading","lazy");
-
-        tile.appendChild(label);
-        tile.appendChild(iframe);
-
+        buildTile(tile, channelKey, channel);
     },30000);
 
 }
 
 /* -----------------------------
-   GRID SAFE RENDER
+   CONSTRUCTION D'UNE TUILE
+   (label, refresh, barre de collage, iframe)
 ----------------------------- */
 
-const grid = document.getElementById("grid");
+function buildTile(tile, channelKey, channel){
 
-/* Groupe 5 : grille 3x3 au lieu de 2x2 */
-if (groupId === "g5") {
-    grid.classList.add("grid-3x3");
-}
-
-selected.forEach((channel) => {
-
-    const tile = document.createElement("div");
-    tile.className = "tile";
+    tile.innerHTML = "";
 
     const label = document.createElement("div");
     label.className = "label";
@@ -277,7 +340,7 @@ selected.forEach((channel) => {
 
     const iframe = document.createElement("iframe");
 
-    iframe.src = channel.url;
+    iframe.src = getEffectiveUrl(channelKey, channel);
 
     iframe.setAttribute("allow", "autoplay; encrypted-media");
     iframe.setAttribute("allowfullscreen", "");
@@ -293,12 +356,118 @@ selected.forEach((channel) => {
 
     setTimeout(() => {
         if (!loaded) {
-            reconnectTile(tile, channel);
+            reconnectTile(tile, channelKey, channel);
         }
     }, 8000);
 
+    /* Icône refresh (visible au survol de la tuile) */
+    const refreshBtn = document.createElement("div");
+    refreshBtn.className = "refresh-btn";
+    refreshBtn.textContent = "⟳";
+    refreshBtn.title = "Coller un nouveau lien";
+
+    /* Barre de collage (mauve, cachée par défaut) */
+    const linkBar = document.createElement("div");
+    linkBar.className = "link-bar";
+
+    const linkInput = document.createElement("input");
+    linkInput.type = "text";
+    linkInput.placeholder = "Coller le nouveau lien ici...";
+
+    const hint = document.createElement("span");
+    hint.className = "link-bar-hint";
+    hint.textContent = "Entrée";
+
+    linkBar.appendChild(linkInput);
+    linkBar.appendChild(hint);
+
+    let closeTimer = null;
+
+    function openBar(){
+        clearTimeout(closeTimer);
+        linkBar.classList.add("open");
+        refreshBtn.classList.add("hidden");
+        linkInput.value = "";
+        linkInput.focus();
+        armCloseTimer();
+    }
+
+    function closeBar(){
+        linkBar.classList.remove("open");
+        refreshBtn.classList.remove("hidden");
+    }
+
+    function armCloseTimer(){
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(closeBar, 3000);
+    }
+
+    refreshBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openBar();
+    });
+
+    /* Toute frappe relance le délai de 3s d'inactivité */
+    linkInput.addEventListener("input", armCloseTimer);
+
+    linkInput.addEventListener("keydown", (e) => {
+
+        if (e.key === "Enter") {
+
+            const newUrl = linkInput.value.trim();
+
+            if (newUrl) {
+                setStoredUrl(channelKey, newUrl);
+                clearTimeout(closeTimer);
+                closeBar();
+                buildTile(tile, channelKey, channel);
+            }
+
+        }
+
+        if (e.key === "Escape") {
+            clearTimeout(closeTimer);
+            closeBar();
+        }
+
+    });
+
+    linkInput.addEventListener("blur", () => {
+        armCloseTimer();
+    });
+
     tile.appendChild(label);
     tile.appendChild(iframe);
+    tile.appendChild(refreshBtn);
+    tile.appendChild(linkBar);
+
+}
+
+/* -----------------------------
+   GRID SAFE RENDER
+----------------------------- */
+
+const grid = document.getElementById("grid");
+
+/* Groupe 5 : grille 3x3 au lieu de 2x2 */
+if (groupId === "g5") {
+    grid.classList.add("grid-3x3");
+}
+
+/* Retrouve la clé (bfmtv, lci, ...) associée à un objet channel,
+   nécessaire pour stocker/retrouver un lien personnalisé */
+function findChannelKey(channel){
+    return Object.keys(channels).find(key => channels[key] === channel);
+}
+
+selected.forEach((channel) => {
+
+    const tile = document.createElement("div");
+    tile.className = "tile";
+
+    const channelKey = findChannelKey(channel);
+
+    buildTile(tile, channelKey, channel);
 
     grid.appendChild(tile);
 

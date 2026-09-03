@@ -113,6 +113,40 @@ iframe {
     display: none;
 }
 
+/* -----------------------------
+   RELOAD BUTTON (valentin.png)
+   Recharge la tuile indépendamment (F5 local)
+----------------------------- */
+
+.reload-btn {
+    position: absolute;
+    top: 5px;
+    right: 36px;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.reload-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.tile:hover .reload-btn {
+    opacity: 1;
+}
+
 .link-bar {
     position: absolute;
     top: 0;
@@ -149,6 +183,40 @@ iframe {
     color: white;
     font-size: 11px;
     white-space: nowrap;
+}
+
+/* -----------------------------
+   SEEK CONTROLS (France Info / YouTube uniquement)
+----------------------------- */
+
+.seek-controls {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    z-index: 3;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tile:hover .seek-controls {
+    opacity: 1;
+}
+
+.seek-btn {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 7px;
+    font-size: 11px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.seek-btn:hover {
+    background: #6f00ff;
 }
 
 /* -----------------------------
@@ -227,7 +295,7 @@ url: "https://hls-m015-live-aka-canalplus.akamaized.net/live/disk/cnews-clair-hd
 
 franceinfo: {
 name: "France Info",
-url: "https://www.youtube.com/embed/NG7ZX42nZKc?autoplay=1&mute=1&controls=0&modestbranding=1"
+url: "https://www.youtube.com/embed/NG7ZX42nZKc?autoplay=1&mute=1&controls=0&modestbranding=1&enablejsapi=1"
 },
 
 novo19: {
@@ -306,6 +374,96 @@ function getEffectiveUrl(channelKey, channel) {
 }
 
 /* -----------------------------
+   YOUTUBE SEEK (France Info uniquement)
+   Utilise le protocole postMessage non officiel de
+   l'iframe YouTube pour connaître le temps courant
+   et faire des sauts avant/arrière.
+----------------------------- */
+
+const youtubeCurrentTime = new Map();
+
+window.addEventListener("message", (event) => {
+
+    if (!event.origin || !event.origin.includes("youtube.com")) return;
+
+    let data;
+    try {
+        data = JSON.parse(event.data);
+    } catch (e) {
+        return;
+    }
+
+    if (data && data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
+        youtubeCurrentTime.set(event.source, data.info.currentTime);
+    }
+
+});
+
+function buildIframeSrc(channelKey, effectiveUrl) {
+
+    if (channelKey === "franceinfo" && effectiveUrl.includes("youtube.com")) {
+
+        let src = effectiveUrl;
+
+        if (!src.includes("enablejsapi")) {
+            src += (src.includes("?") ? "&" : "?") + "enablejsapi=1";
+        }
+        if (!src.includes("origin=")) {
+            src += "&origin=" + encodeURIComponent(window.location.origin);
+        }
+
+        return src;
+
+    }
+
+    return effectiveUrl;
+
+}
+
+function createSeekControls(iframe){
+
+    const wrap = document.createElement("div");
+    wrap.className = "seek-controls";
+
+    const defs = [
+        { label: "-1m", delta: -60 },
+        { label: "-10s", delta: -10 },
+        { label: "+10s", delta: 10 },
+        { label: "+1m", delta: 60 }
+    ];
+
+    defs.forEach(d => {
+
+        const btn = document.createElement("button");
+        btn.className = "seek-btn";
+        btn.textContent = d.label;
+        btn.title = "Avancer / reculer dans le direct";
+
+        btn.addEventListener("click", (e) => {
+
+            e.stopPropagation();
+
+            const current = youtubeCurrentTime.get(iframe.contentWindow) || 0;
+            const target = Math.max(0, current + d.delta);
+
+            try {
+                iframe.contentWindow.postMessage(
+                    JSON.stringify({ event: "command", func: "seekTo", args: [target, true] }),
+                    "https://www.youtube.com"
+                );
+            } catch (err) {}
+
+        });
+
+        wrap.appendChild(btn);
+
+    });
+
+    return wrap;
+
+}
+
+/* -----------------------------
    RECONNECT
 ----------------------------- */
 
@@ -327,7 +485,7 @@ function reconnectTile(tile, channelKey, channel){
 
 /* -----------------------------
    CONSTRUCTION D'UNE TUILE
-   (label, refresh, barre de collage, iframe)
+   (label, refresh, barre de collage, iframe, seek si France Info)
 ----------------------------- */
 
 function buildTile(tile, channelKey, channel){
@@ -340,7 +498,8 @@ function buildTile(tile, channelKey, channel){
 
     const iframe = document.createElement("iframe");
 
-    iframe.src = getEffectiveUrl(channelKey, channel);
+    const effectiveUrl = getEffectiveUrl(channelKey, channel);
+    iframe.src = buildIframeSrc(channelKey, effectiveUrl);
 
     iframe.setAttribute("allow", "autoplay; encrypted-media");
     iframe.setAttribute("allowfullscreen", "");
@@ -349,9 +508,21 @@ function buildTile(tile, channelKey, channel){
     iframe.style.background = "black";
 
     let loaded = false;
+    const isYoutubeFranceInfo = (channelKey === "franceinfo" && iframe.src.includes("youtube.com"));
 
     iframe.onload = () => {
+
         loaded = true;
+
+        if (isYoutubeFranceInfo) {
+            try {
+                iframe.contentWindow.postMessage(
+                    JSON.stringify({ event: "listening", id: channelKey, channel: "widget" }),
+                    "https://www.youtube.com"
+                );
+            } catch (err) {}
+        }
+
     };
 
     setTimeout(() => {
@@ -441,6 +612,10 @@ function buildTile(tile, channelKey, channel){
     tile.appendChild(refreshBtn);
     tile.appendChild(linkBar);
 
+    if (isYoutubeFranceInfo) {
+        tile.appendChild(createSeekControls(iframe));
+    }
+
 }
 
 /* -----------------------------
@@ -472,6 +647,14 @@ selected.forEach((channel) => {
     grid.appendChild(tile);
 
 });
+
+/* -----------------------------
+   AUTO-REFRESH toutes les 10 minutes
+----------------------------- */
+
+setInterval(() => {
+    window.location.reload();
+}, 10 * 60 * 1000);
 
 /* -----------------------------
    STINGER : l'écran est masqué par le crème "Novo19"

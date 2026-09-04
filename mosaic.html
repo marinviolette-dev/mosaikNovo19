@@ -531,6 +531,22 @@ function buildTile(tile, channelKey, channel){
         }
     }, 8000);
 
+    /* Icône reload individuel (valentin.png) — F5 local de la tuile */
+    const reloadBtn = document.createElement("div");
+    reloadBtn.className = "reload-btn";
+    reloadBtn.title = "Recharger cette chaîne";
+
+    const reloadImg = document.createElement("img");
+    reloadImg.src = "asset/valentin.png";
+    reloadImg.alt = "Recharger";
+
+    reloadBtn.appendChild(reloadImg);
+
+    reloadBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        buildTile(tile, channelKey, channel);
+    });
+
     /* Icône refresh (visible au survol de la tuile) */
     const refreshBtn = document.createElement("div");
     refreshBtn.className = "refresh-btn";
@@ -609,6 +625,7 @@ function buildTile(tile, channelKey, channel){
 
     tile.appendChild(label);
     tile.appendChild(iframe);
+    tile.appendChild(reloadBtn);
     tile.appendChild(refreshBtn);
     tile.appendChild(linkBar);
 

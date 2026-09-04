@@ -82,14 +82,28 @@ iframe {
 }
 
 /* -----------------------------
-   REFRESH LINK OVERLAY
+   TOP-RIGHT CONTROLS (reload valentin.png + refresh lien)
+   Regroupés dans un même conteneur flex pour rester
+   collés l'un à l'autre quelle que soit leur taille.
 ----------------------------- */
 
-.refresh-btn {
+.top-controls {
     position: absolute;
     top: 5px;
     right: 5px;
     z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tile:hover .top-controls {
+    opacity: 1;
+}
+
+.refresh-btn {
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -101,12 +115,7 @@ iframe {
     font-size: 15px;
     cursor: pointer;
     user-select: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.tile:hover .refresh-btn {
-    opacity: 1;
+    flex-shrink: 0;
 }
 
 .refresh-btn.hidden {
@@ -119,14 +128,9 @@ iframe {
 ----------------------------- */
 
 .reload-btn {
-    position: absolute;
-    top: 5px;
-    right: 36px;
-    z-index: 3;
     cursor: pointer;
     user-select: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    flex-shrink: 0;
 }
 
 .reload-btn img {
@@ -134,10 +138,7 @@ iframe {
     height: 100px;
     object-fit: contain;
     pointer-events: none;
-}
-
-.tile:hover .reload-btn {
-    opacity: 1;
+    display: block;
 }
 
 .link-bar {
@@ -616,10 +617,15 @@ function buildTile(tile, channelKey, channel){
         armCloseTimer();
     });
 
+    /* Conteneur commun (haut droite) : reload individuel + refresh lien */
+    const topControls = document.createElement("div");
+    topControls.className = "top-controls";
+    topControls.appendChild(reloadBtn);
+    topControls.appendChild(refreshBtn);
+
     tile.appendChild(label);
     tile.appendChild(iframe);
-    tile.appendChild(reloadBtn);
-    tile.appendChild(refreshBtn);
+    tile.appendChild(topControls);
     tile.appendChild(linkBar);
 
     if (isYoutubeFranceInfo) {
